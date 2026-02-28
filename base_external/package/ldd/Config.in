@@ -1,0 +1,4 @@
+config BR2_PACKAGE_LDD
+	bool "ldd"
+	help
+	  Includes ldd3 scull and misc-modules components for Assignment 7.
