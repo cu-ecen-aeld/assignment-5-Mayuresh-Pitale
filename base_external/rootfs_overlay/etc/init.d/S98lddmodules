@@ -8,32 +8,42 @@ case "$1" in
         # 1. Load hello module via modprobe
         modprobe hello
 
-        # 2. Load faulty module (using insmod bypasses the CONFIG_MD_FAULTY conflict)
-        insmod /lib/modules/$(uname -r)/extra/faulty.ko
-        major=$(awk '$2=="faulty" {print $1}' /proc/devices)
-        if [ ! -z "$major" ]; then
-            rm -f /dev/faulty
-            mknod /dev/faulty c $major 0
-            chmod 666 /dev/faulty
+        # 2. Dynamically find and load faulty
+        FAULTY_MOD=$(find /lib/modules -type f -name faulty.ko | head -n 1)
+        if [ -n "$FAULTY_MOD" ]; then
+            insmod "$FAULTY_MOD"
+            major=$(awk '$2=="faulty" {print $1}' /proc/devices)
+            if [ ! -z "$major" ]; then
+                rm -f /dev/faulty
+                mknod /dev/faulty c $major 0
+                chmod 666 /dev/faulty
+            fi
+        else
+            echo "ERROR: faulty.ko not found!"
         fi
         
-        # 3. Load scull module
-        insmod /lib/modules/$(uname -r)/extra/scull.ko
-        major=$(awk '$2=="scull" {print $1}' /proc/devices)
-        if [ ! -z "$major" ]; then
-            rm -f /dev/scull[0-3]
-            mknod /dev/scull0 c $major 0
-            mknod /dev/scull1 c $major 1
-            mknod /dev/scull2 c $major 2
-            mknod /dev/scull3 c $major 3
-            chmod 666 /dev/scull[0-3]
+        # 3. Dynamically find and load scull
+        SCULL_MOD=$(find /lib/modules -type f -name scull.ko | head -n 1)
+        if [ -n "$SCULL_MOD" ]; then
+            insmod "$SCULL_MOD"
+            major=$(awk '$2=="scull" {print $1}' /proc/devices)
+            if [ ! -z "$major" ]; then
+                rm -f /dev/scull[0-3]
+                mknod /dev/scull0 c $major 0
+                mknod /dev/scull1 c $major 1
+                mknod /dev/scull2 c $major 2
+                mknod /dev/scull3 c $major 3
+                chmod 666 /dev/scull[0-3]
+            fi
+        else
+            echo "ERROR: scull.ko not found!"
         fi
         ;;
     stop)
         echo "Unloading LDD modules..."
-        rmmod hello
-        rmmod faulty
-        rmmod scull
+        rmmod hello 2>/dev/null
+        rmmod faulty 2>/dev/null
+        rmmod scull 2>/dev/null
         rm -f /dev/faulty
         rm -f /dev/scull[0-3]
         ;;
