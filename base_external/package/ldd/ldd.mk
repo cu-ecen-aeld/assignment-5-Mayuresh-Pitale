@@ -4,7 +4,7 @@
 #
 ##############################################################
 
-LDD_SITE = "git@github.com:cu-ecen-aeld/assignment-7-Mayuresh-Pitale.git"
+LDD_SITE = "https://github.com/cu-ecen-aeld/assignment-7-Mayuresh-Pitale.git"
 LDD_SITE_METHOD = git
 LDD_GIT_SUBMODULES = YES
 LDD_VERSION = main
